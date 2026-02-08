@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akademi Sainvisma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Gray-900 */
+            color: #d1d5db; /* Gray-300 */
+        }
+        .card {
+            background-color: #1f2937; /* Gray-800 */
+            border: 1px solid #374151; /* Gray-700 */
+            border-radius: 0.75rem;
+        }
+        .tab-btn {
+            background-color: transparent;
+            color: #9ca3af; /* Gray-400 */
+            border-bottom: 2px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .tab-btn.active {
+            color: #06b6d4; /* Cyan-600 */
+            border-color: #06b6d4; /* Cyan-600 */
+        }
+        /* New Gradient for Branding Tab */
+        #tab-branding.active {
+            color: #c084fc; /* Purple-400 */
+            border-color: #c084fc;
+        }
+        /* Gradient for Script Tab */
+        #tab-script.active {
+            color: #fb7185; /* Rose-400 */
+            border-color: #fb7185;
+        }
+        /* Gradient for Mentor Tab */
+        #tab-mentor.active {
+            color: #34d399; /* Emerald-400 */
+            border-color: #34d399;
+        }
+        /* Gradient for Logo Tab */
+        #tab-logo.active {
+            color: #facc15; /* Yellow-400 */
+            border-color: #facc15;
+        }
+        /* Gradient for Video Tab */
+        #tab-video.active {
+            color: #60a5fa; /* Blue-400 */
+            border-color: #60a5fa;
+        }
+        
+        .btn-primary {
+            background-color: #06b6d4; /* Cyan-600 */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0891b2; /* Cyan-700 */
+        }
+        .btn-primary:disabled {
+            background-color: #374151; /* Gray-700 */
+            color: #6b7280; /* Gray-500 */
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background-color: #374151; /* Gray-700 */
+            color: #e5e7eb; /* Gray-200 */
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* Gray-600 */
+        }
+        .btn-secondary:disabled {
+            background-color: #1f2937; /* Gray-800 */
+            color: #4b5563; /* Gray-600 */
+            cursor: not-allowed;
+        }
+        .loader {
+            border: 3px solid rgba(6, 182, 212, 0.5); /* Cyan-600 */
+            border-left-color: #374151; /* Gray-700 */
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .file-input-label {
+            cursor: pointer;
+            border: 2px dashed #4b5563; /* Gray-600 */
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        .file-input-label:hover {
+            border-color: #9ca3af; /* Gray-400 */
+            background-color: #374151; /* Gray-700 */
+        }
+        .result-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .upload-box {
+            border: 2px dashed #94a3b8;
+            transition: all 0.3s ease;
+        }
+        .upload-box.dragging {
+            border-color: #06b6d4;
+            background-color: #f1f5f9;
+        }
+        .upload-box img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: #1f2937; /* Gray-800 */
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.visible .modal-content {
+            transform: scale(1);
+        }
+         /* Custom scrollbar */
+        #poses-poseListContainer::-webkit-scrollbar,
+        #mentor-chat-history::-webkit-scrollbar {
+            width: 8px;
+        }
+        #poses-poseListContainer::-webkit-scrollbar-track,
+        #mentor-chat-history::-webkit-scrollbar-track {
+            background: #374151; /* Gray-700 */
+        }
+        #poses-poseListContainer::-webkit-scrollbar-thumb,
+        #mentor-chat-history::-webkit-scrollbar-thumb {
+            background: #06b6d4; /* cyan-600 */
+            border-radius: 4px;
+        }
+        #poses-poseListContainer::-webkit-scrollbar-thumb:hover,
+        #mentor-chat-history::-webkit-scrollbar-thumb:hover {
+            background: #0891b2; /* cyan-700 */
+        }
+        .orientation-label:has(input:checked) {
+            border-color: #06b6d4; /* cyan-600 */
+            background-color: #0e7490; /* cyan-800 */
+        }
+
+        /* --- Voice Over Tab Specific Styles --- */
+        #content-voiceover .loader {
+            display: flex;
+            align-items: flex-end;
+            height: 32px;
+            width: auto;
+            border: none;
+            animation: none;
+        }
+        #content-voiceover .loader .bar {
+            width: 5px;
+            margin: 0 2px;
+            background-color: #2563eb;
+            border-radius: 3px;
+            animation: wave 1.2s ease-in-out infinite;
+        }
+        #content-voiceover .loader .bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+        #content-voiceover .loader .bar:nth-child(2) { height: 20px; animation-delay: 0.1s; }
+        #content-voiceover .loader .bar:nth-child(3) { height: 25px; animation-delay: 0.2s; }
+        #content-voiceover .loader .bar:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+        #content-voiceover .loader .bar:nth-child(5) { height: 10px; animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.2); }
+            50% { transform: scaleY(1); }
+        }
+        #content-voiceover .btn {
+            @apply w-full md:w-auto font-semibold py-3 px-6 rounded-lg focus:outline-none focus:ring-4 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center;
+        }
+        #content-voiceover .btn-primary { @apply bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-300; }
+        #content-voiceover .btn-secondary { @apply bg-gray-700 text-gray-200 hover:bg-gray-600 focus:ring-gray-300; }
+        #content-voiceover .voice-item.selected { @apply bg-blue-900 border-blue-600 ring-2 ring-blue-300; }
+        #content-voiceover .preview-loader {
+            width: 16px; height: 16px; border: 2px solid #9ca3af;
+            border-top-color: #2563eb; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        #content-voiceover input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #4b5563; border-radius: 5px; outline: none; transition: background 0.3s; }
+        #content-voiceover input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 2px solid #1f2937; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        #content-voiceover input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 2px solid #1f2937; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+
+        #content-voiceover #vo-audio-container.playing {
+            animation: pulse-blue 2s infinite;
+            border-radius: 0.5rem; /* agar animasi shadow terlihat bagus */
+        }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="relative w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-6">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-lime-500">
+                Akademi Sainvisma
+            </h1>
+            <p class="text-lg text-gray-400 mt-2 max-w-3xl mx-auto">
+                Desain Visual Jenama - Kreasi Visual Praktis Foto dan Video dengan AI Gemini
+            </p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="flex justify-center border-b-2 border-gray-700 mb-8 flex-wrap gap-2">
+            <button id="tab-broll" class="tab-btn px-6 py-3 font-semibold active" onclick="switchTab('broll')">
+                ✨ Foto Produk
+            </button>
+            <button id="tab-poses" class="tab-btn px-6 py-3 font-semibold" onclick="switchTab('poses')">
+                💃 Pose Fashion
+            </button>
+            <button id="tab-script" class="tab-btn px-6 py-3 font-semibold text-rose-400 hover:text-rose-300" onclick="switchTab('script')">
+                🎬 Kreator Skrip
+            </button>
+            <button id="tab-voiceover" class="tab-btn px-6 py-3 font-semibold" onclick="switchTab('voiceover')">
+                🎤 Voice Over
+            </button>
+            <button id="tab-video" class="tab-btn px-6 py-3 font-semibold text-blue-400 hover:text-blue-300" onclick="switchTab('video')">
+                🎥 Video Generator
+            </button>
+            <a href="https://opal.google/?flow=drive:/1GuIYAs3-fRDr2PI9GwaVstCQdHBvqNTk&shared&mode=app" target="_blank" rel="noopener noreferrer" class="tab-btn px-6 py-3 font-semibold hover:text-gray-100">
+                Veo Generator
+            </a>
+            <button id="tab-branding" class="tab-btn px-6 py-3 font-semibold text-purple-400 hover:text-purple-300" onclick="switchTab('branding')">
+                🧠 Konsultan Branding
+            </button>
+            <button id="tab-logo" class="tab-btn px-6 py-3 font-semibold text-yellow-400 hover:text-yellow-300" onclick="switchTab('logo')">
+                🎨 Logo Maker
+            </button>
+            <button id="tab-mentor" class="tab-btn px-6 py-3 font-semibold text-emerald-400 hover:text-emerald-300" onclick="switchTab('mentor')">
+                🎓 Mentor Bisnis
+            </button>
+            <a href="https://www.meta.ai/" target="_blank" rel="noopener noreferrer" class="tab-btn px-6 py-3 font-semibold hover:text-gray-100">
+                Meta AI Unlimited Image to Video
+            </a>
+        </nav>
+
+        <!-- Tab Content Containers -->
+
+        <!-- TAB 1: B-Roll / AI Product Photography -->
+        <div id="content-broll" class="tab-content">
+            <main class="flex flex-col lg:flex-row gap-8">
+                <!-- Input Column -->
+                <div class="card p-6 w-full lg:w-1/3 lg:max-w-sm flex-shrink-0 self-start">
+                    <div class="flex flex-col gap-6">
+                        <div>
+                            <h2 class="text-xl font-semibold mb-3 text-gray-100">1. Unggah Gambar Produk</h2>
+                            <div id="broll-image-upload-area">
+                                <label for="broll-image-input" class="file-input-label rounded-lg text-center text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span>Pilih Gambar Produk</span>
+                                    <span class="text-xs mt-1">(Bisa lebih dari satu)</span>
+                                </label>
+                                <input type="file" id="broll-image-input" class="hidden" accept="image/png, image/jpeg, image/webp" multiple onchange="handleBrollPreview(event)">
+                            </div>
+                            <div id="broll-image-preview-container" class="hidden mt-4 grid grid-cols-3 gap-2">
+                                <!-- Previews will be added here -->
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h2 class="text-xl font-semibold text-gray-100">2. Deskripsi Produk</h2>
+                                <button id="broll-generate-desc-btn" class="btn-secondary text-sm font-semibold py-1 px-3 rounded-md flex items-center" disabled>
+                                    ✨ Buat Deskripsi
+                                </button>
+                            </div>
+                            <textarea id="broll-product-desc-input" rows="4" class="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-gray-200 focus:bg-gray-800" placeholder="Contoh: Smartwatch X200 tahan air dengan GPS... atau klik 'Buat Deskripsi' setelah unggah gambar."></textarea>
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-semibold mb-3 text-gray-100">3. Unggah Foto Model <span class="text-sm text-gray-500">(Opsional)</span></h2>
+                            <div id="broll-model-image-upload-area">
+                                <label for="broll-model-image-input" class="file-input-label rounded-lg text-center text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                    <span>Pilih Foto Model</span>
+                                </label>
+                                <input type="file" id="broll-model-image-input" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handleModelPreview(event)">
+                            </div>
+                            <div id="broll-model-image-preview-container" class="hidden mt-4 relative">
+                                <img id="broll-model-image-preview" src="#" alt="Pratinjau Model" class="rounded-lg w-full h-auto object-contain">
+                                <button id="broll-remove-model-image-btn" onclick="removeModelImage()" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-semibold mb-3 text-gray-100">4. Tema Foto <span class="text-sm text-gray-500">(Opsional)</span></h2>
+                            <textarea id="broll-photo-theme-input" rows="3" class="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-gray-200 focus:bg-gray-800" placeholder="Contoh: Minimalis & bersih, nuansa alam tropis, futuristik dengan neon..."></textarea>
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-semibold mb-3 text-gray-100">5. Orientasi Gambar</h2>
+                            <div class="flex gap-4">
+                                <label for="broll-orientation-horizontal" class="orientation-label flex items-center gap-2 p-3 border border-gray-600 rounded-lg cursor-pointer flex-1 justify-center transition text-gray-300">
+                                    <input type="radio" id="broll-orientation-horizontal" name="broll-orientation" value="horizontal" class="hidden" checked>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="6" rx="2"></rect></svg>
+                                    <span>Horizontal</span>
+                                </label>
+                                <label for="broll-orientation-vertical" class="orientation-label flex items-center gap-2 p-3 border border-gray-600 rounded-lg cursor-pointer flex-1 justify-center transition text-gray-300">
+                                    <input type="radio" id="broll-orientation-vertical" name="broll-orientation" value="vertical" class="hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="18" x="6" y="3" rx="2"></rect></svg>
+                                    <span>Vertikal</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button id="broll-generate-btn" class="w-full btn-primary font-bold py-3 px-4 rounded-lg flex items-center justify-center text-lg">
+                            <span>Buat 21 Pose Produk</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Grid -->
+                <div class="flex-grow">
+                     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 min-h-[500px] flex items-center justify-center text-gray-500 flex-col">
+                        <i class="fas fa-image text-6xl mb-4 text-gray-700"></i>
+                        <p>Hasil generasi foto produk akan muncul di sini</p>
+                    </div>
+                    <div id="broll-b-roll-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
+                         <!-- Placeholders loaded by JS -->
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- TAB 2: Pose Fashion -->
+        <div id="content-poses" class="tab-content hidden">
+             <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 w-full max-w-4xl mx-auto border border-gray-700">
+                
+                <!-- Error Message -->
+                <div id="poses-errorContainer" class="hidden bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                    <strong class="font-bold">Oops! </strong>
+                    <span class="block sm:inline" id="poses-errorMessage">Terjadi kesalahan.</span>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-cyan-500 transition-colors" id="poses-uploadArea">
+                    <label for="poses-imageUpload" class="cursor-pointer">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-500 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+                            <p class="font-semibold text-lg text-gray-200">Klik untuk mengunggah atau seret gambar</p>
+                            <p class="text-sm text-gray-400 mt-1">PNG, JPG, atau WEBP (Maks. 5MB)</p>
+                        </div>
+                        <input type="file" id="poses-imageUpload" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handlePoseUpload(event)">
+                    </label>
+                </div>
+                
+                <!-- Preview Uploaded Image -->
+                <div id="poses-previewContainer" class="hidden mt-6 text-center">
+                    <p class="font-semibold mb-2 text-gray-200">Gambar yang diunggah:</p>
+                    <div class="relative inline-block border-2 border-gray-600 rounded-xl p-2">
+                        <img id="poses-imagePreview" src="" alt="Pratinjau Gambar" class="max-h-40 rounded-lg mx-auto">
+                    </div>
+                    <p id="poses-fileName" class="text-sm text-gray-400 mt-2"></p>
+                </div>
+                
+                <!-- Generate Button -->
+                <div class="mt-8 text-center">
+                    <button id="poses-selectPoseBtn" onclick="openPoseModal()" class="bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-600/20">
+                        <span class="flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks"><path d="m3 16 2 2 4-4"/><path d="m3 12 2 2 4-4"/><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/></svg>
+                            Pilih 21 Pose
+                        </span>
+                    </button>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="poses-resultsContainer" class="hidden mt-10">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-gray-100">Hasil Pose Sedang Disiapkan...</h2>
+                    <div id="poses-resultsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                        <!-- Generated images will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pose Selection Modal -->
+            <div id="poses-poseModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+                <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+                    <div class="p-6 border-b border-gray-700">
+                        <h3 class="text-2xl font-bold text-gray-100">Pilih Hingga 21 Pose</h3>
+                        <p class="text-gray-400">Terpilih: <span id="poses-selectionCounter" class="font-bold">0</span>/21</p>
+                    </div>
+                    <div id="poses-poseListContainer" class="p-6 overflow-y-auto grid grid-cols-2 gap-3">
+                         <!-- Dummy Checkboxes -->
+                         <label class="flex items-center space-x-2 p-2 rounded hover:bg-gray-700 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-cyan-600 rounded">
+                            <span>Pose Berdiri Formal</span>
+                         </label>
+                         <label class="flex items-center space-x-2 p-2 rounded hover:bg-gray-700 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-cyan-600 rounded">
+                            <span>Pose Duduk Santai</span>
+                         </label>
+                         <label class="flex items-center space-x-2 p-2 rounded hover:bg-gray-700 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-cyan-600 rounded">
+                            <span>Close-up Wajah</span>
+                         </label>
+                         <label class="flex items-center space-x-2 p-2 rounded hover:bg-gray-700 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-cyan-600 rounded">
+                            <span>Berjalan (Candid)</span>
+                         </label>
+                    </div>
+                    <div class="p-6 border-t border-gray-700 flex justify-end gap-4">
+                        <button id="poses-cancelModalBtn" onclick="closePoseModal()" class="bg-gray-600 text-gray-200 font-semibold py-2 px-6 rounded-lg hover:bg-gray-500 transition-colors">Batal</button>
+                        <button id="poses-generateBtn" onclick="closePoseModal()" class="bg-cyan-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-cyan-700 transition-all">
+                            Buat Pose
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Script Creator (Placeholder) -->
+        <div id="content-script" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="card p-8 text-center border-rose-500/30">
+                    <div class="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-scroll text-2xl text-rose-500"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-rose-400 mb-2">Kreator Skrip Video</h2>
+                    <p class="text-gray-400 mb-6">Buat naskah video TikTok, Reels, atau YouTube Shorts yang menarik dalam hitungan detik.</p>
+                    
+                    <textarea class="w-full p-4 bg-gray-900 border border-gray-700 rounded-xl focus:border-rose-500 focus:ring-1 focus:ring-rose-500 mb-4" rows="4" placeholder="Tentang apa video Anda? (Contoh: Review skincare anti-aging untuk pemula)"></textarea>
+                    
+                    <button class="bg-rose-600 hover:bg-rose-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto">
+                        Buat Skrip
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Voice Over -->
+        <div id="content-voiceover" class="tab-content hidden">
+             <div class="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 space-y-6 mx-auto">
+                <!-- Header -->
+                <div class="text-center">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-100 flex items-center justify-center">
+                        <div class="loader mr-4">
+                            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        </div>
+                        Generator Voice Over Profesional
+                    </h1>
+                    <p class="text-gray-400 mt-2">Ubah teks menjadi audio dengan kontrol gaya, pitch, dan volume.</p>
+                </div>
+
+                <!-- Form Input -->
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2"><label for="vo-text-input" class="block text-sm font-medium text-gray-300">Masukkan Teks di Sini:</label> <div class="flex items-center space-x-2"><button id="vo-copy-text-btn" title="Salin Teks" class="text-gray-500 hover:text-blue-600 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button><button id="vo-clear-text-btn" onclick="document.getElementById('vo-text-input').value=''" title="Hapus Teks" class="text-gray-500 hover:text-red-600 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></div></div>
+                        <textarea id="vo-text-input" rows="5" class="w-full p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow bg-gray-900 text-gray-200 focus:bg-gray-800" placeholder="Contoh: Halo semuanya! Hari ini kita akan membahas penemuan terbaru di dunia sains."></textarea>
+                        <div class="text-right text-xs text-gray-400 mt-1" id="vo-char-counter">0 / 5000</div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="vo-style-input" class="block text-sm font-medium text-gray-300">Kontrol Gaya Bicara (Opsional):</label>
+                            <button id="vo-open-guidance-btn" onclick="toggleGuidanceModal(true)" class="text-gray-500 hover:text-blue-600 transition-colors flex items-center space-x-1 text-xs" title="Lihat Panduan"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> <span>Panduan</span></button>
+                        </div>
+                        <input type="text" id="vo-style-input" class="w-full p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow bg-gray-900 text-gray-200 focus:bg-gray-800" placeholder="Contoh: Ucapkan dengan nada gembira dan bersemangat">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Pilih Suara:</label>
+                        <div id="vo-voice-list" class="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-gray-900 border-gray-700">
+                             <div class="p-2 hover:bg-gray-700 rounded cursor-pointer selected bg-blue-900/50 border border-blue-500">
+                                <span class="font-bold">Indonesian - Female (Siti)</span>
+                             </div>
+                             <div class="p-2 hover:bg-gray-700 rounded cursor-pointer">
+                                <span class="font-bold">Indonesian - Male (Budi)</span>
+                             </div>
+                             <div class="p-2 hover:bg-gray-700 rounded cursor-pointer">
+                                <span class="font-bold">English - Female (Sarah)</span>
+                             </div>
+                        </div>
+                    </div>
+                    <!-- Pengaturan Suara -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <div class="flex justify-between items-center mb-2"><label for="vo-pitch-slider" class="block text-sm font-medium text-gray-300">Pitch Suara:</label><div class="flex items-center space-x-2"><span id="vo-pitch-value" class="text-sm font-mono text-gray-300 bg-gray-700 px-2 py-0.5 rounded">0.0</span><button id="vo-reset-pitch-btn" title="Reset Pitch" class="text-gray-500 hover:text-blue-600 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4 4l16 16" /></svg></button></div></div>
+                            <input type="range" id="vo-pitch-slider" min="-20" max="20" value="0" step="0.1" class="w-full" oninput="document.getElementById('vo-pitch-value').innerText = this.value">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2"><label for="vo-volume-slider" class="block text-sm font-medium text-gray-300">Volume Suara:</label><div class="flex items-center space-x-2"><span id="vo-volume-value" class="text-sm font-mono text-gray-300 bg-gray-700 px-2 py-0.5 rounded">0.0 dB</span><button id="vo-reset-volume-btn" title="Reset Volume" class="text-gray-500 hover:text-blue-600 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4 4l16 16" /></svg></button></div></div>
+                            <input type="range" id="vo-volume-slider" min="-20" max="20" value="0" step="1" class="w-full" oninput="document.getElementById('vo-volume-value').innerText = this.value + ' dB'">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="text-center pt-2"><button id="vo-generate-btn" class="btn btn-primary w-full">Buat Voice Over</button></div>
+                
+                <!-- Area Hasil -->
+                <div id="vo-result-container" class="hidden space-y-4 pt-4 border-t border-gray-700">
+                    <div class="flex items-center justify-center" id="vo-loader-container">
+                        <div class="loader">
+                            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        </div>
+                        <p class="ml-4 text-gray-300 font-medium">Sedang memproses audio...</p>
+                    </div>
+                    <!-- Hidden audio player for demo -->
+                </div>
+            </div>
+            
+            <!-- Modal Voice Over Guidance (Completed) -->
+            <div id="vo-guidance-modal" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center p-4 z-50">
+                <div class="relative mx-auto p-6 border w-full max-w-lg shadow-lg rounded-xl bg-gray-800 border-gray-700">
+                    <div class="text-center">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl leading-6 font-bold text-gray-100">Panduan Gaya Bicara</h3>
+                            <button id="vo-close-guidance-btn" onclick="toggleGuidanceModal(false)" class="text-gray-500 hover:text-gray-400 transition-colors">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="text-left space-y-4 text-gray-300 text-sm">
+                            <p>Gunakan panduan berikut untuk hasil terbaik:</p>
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li><strong>Emosi:</strong> "Ceria", "Sedih", "Marah", "Tenang".</li>
+                                <li><strong>Kecepatan:</strong> "Bicara cepat", "Bicara lambat".</li>
+                                <li><strong>Jeda:</strong> Gunakan tanda koma (,) untuk jeda pendek dan titik (.) untuk jeda panjang.</li>
+                                <li><strong>Penekanan:</strong> Gunakan huruf kapital untuk kata yang ingin ditekankan (contoh: "Sangat PENTING").</li>
+                            </ul>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="toggleGuidanceModal(false)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Placeholders for missing tabs -->
+        <div id="content-video" class="tab-content hidden">
+            <div class="flex items-center justify-center h-64 bg-gray-800 rounded-xl border border-dashed border-gray-700">
+                <p class="text-gray-400">Video Generator Module Loading...</p>
+            </div>
+        </div>
+        <div id="content-branding" class="tab-content hidden">
+             <div class="flex items-center justify-center h-64 bg-gray-800 rounded-xl border border-dashed border-gray-700">
+                <p class="text-gray-400">Branding Consultant Module Loading...</p>
+            </div>
+        </div>
+        <div id="content-logo" class="tab-content hidden">
+             <div class="flex items-center justify-center h-64 bg-gray-800 rounded-xl border border-dashed border-gray-700">
+                <p class="text-gray-400">Logo Maker Module Loading...</p>
+            </div>
+        </div>
+        <div id="content-mentor" class="tab-content hidden">
+             <div class="flex items-center justify-center h-64 bg-gray-800 rounded-xl border border-dashed border-gray-700">
+                <p class="text-gray-400">Mentor Bisnis Module Loading...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Tab Switching Logic ---
+        function switchTab(tabName) {
+            // Hide all contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+            
+            // Show selected content
+            const selectedContent = document.getElementById(`content-${tabName}`);
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+
+            // Update button states
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            const selectedBtn = document.getElementById(`tab-${tabName}`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+        }
+
+        // --- B-Roll Preview Logic ---
+        function handleBrollPreview(event) {
+            const container = document.getElementById('broll-image-preview-container');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
+            
+            const files = event.target.files;
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'relative aspect-square bg-gray-800 rounded overflow-hidden';
+                        div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                        container.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                });
+                document.getElementById('broll-generate-desc-btn').disabled = false;
+                document.getElementById('broll-generate-btn').disabled = false;
+            }
+        }
+
+        function handleModelPreview(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('broll-model-image-preview').src = e.target.result;
+                    document.getElementById('broll-model-image-preview-container').classList.remove('hidden');
+                    document.getElementById('broll-model-image-upload-area').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeModelImage() {
+            document.getElementById('broll-model-image-input').value = '';
+            document.getElementById('broll-model-image-preview-container').classList.add('hidden');
+            document.getElementById('broll-model-image-upload-area').classList.remove('hidden');
+        }
+
+        // --- Poses Logic ---
+        function handlePoseUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('poses-imagePreview').src = e.target.result;
+                    document.getElementById('poses-previewContainer').classList.remove('hidden');
+                    document.getElementById('poses-uploadArea').classList.add('hidden');
+                    document.getElementById('poses-selectPoseBtn').disabled = false;
+                    document.getElementById('poses-fileName').textContent = file.name;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openPoseModal() {
+            document.getElementById('poses-poseModal').classList.remove('hidden');
+        }
+
+        function closePoseModal() {
+            document.getElementById('poses-poseModal').classList.add('hidden');
+        }
+
+        // --- Voice Over Logic ---
+        function toggleGuidanceModal(show) {
+            const modal = document.getElementById('vo-guidance-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Update Char Counter
+        const voInput = document.getElementById('vo-text-input');
+        const voCounter = document.getElementById('vo-char-counter');
+        if (voInput) {
+            voInput.addEventListener('input', function() {
+                voCounter.textContent = `${this.value.length} / 5000`;
+            });
+        }
+    </script>
+document
+  .getElementById("broll-generate-btn")
+  .addEventListener("click", async () => {
+
+    const product = document.getElementById("broll-product-desc-input").value;
+    const theme = document.getElementById("broll-photo-theme-input").value;
+    const orientation = document.querySelector(
+      'input[name="broll-orientation"]:checked'
+    ).value;
+
+    const output = document.getElementById("broll-b-roll-grid");
+
+    output.innerHTML = `
+      <div class="text-gray-400">AI sedang memproses prompt foto...</div>
+    `;
+
+    const res = await fetch("/api/product-photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        product,
+        theme,
+        orientation
+      })
+    });
+
+    const data = await res.json();
+
+    output.innerHTML = `
+      <div class="card p-6">
+        <h3 class="text-lg font-bold text-cyan-400 mb-3">
+          AI Product Photo Prompt
+        </h3>
+        <pre class="whitespace-pre-wrap text-sm text-gray-200">
+${data.result}
+        </pre>
+      </div>
+    `;
+});
+
+</body>
+</html>
